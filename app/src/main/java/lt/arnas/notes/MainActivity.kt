@@ -7,25 +7,27 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ListView
 import androidx.activity.result.contract.ActivityResultContracts
+import lt.arnas.notes.databinding.ActivityMainBinding
+import lt.arnas.notes.databinding.NoteBinding
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var adapter: CustomAdapter
-    lateinit var addNote: Button
-    lateinit var noteListView: ListView
+    private lateinit var adapter: CustomAdapter
+    private var noteIndex = -1
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
 
-        addNote = findViewById(R.id.addNote)
-        noteListView = findViewById(R.id.noteListView)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val notes = mutableListOf<Note>()
         generateListOfNotes(notes)
 
         addAdapter(notes)
-        noteListView.adapter = adapter
+        binding.noteListView.adapter = adapter
 
         setClickOpenNoteDetails()
         setClickOpenNoteActivity()
@@ -41,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         for (note in 1..5) {
             notes.add(
                 Note(
-                    note.toLong(),
+                    note,
                     "text01%04x".format(note),
                     "text02%09x".format(note)
                 )
@@ -50,20 +52,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setClickOpenNoteDetails() {
-        noteListView.setOnItemClickListener { adapterView, view, position, l ->
+        binding.noteListView.setOnItemClickListener { adapterView, view, position, l ->
             val note: Note = adapterView.getItemAtPosition(position) as Note
+            noteIndex = position
 
             val itemIntent = Intent(this, EditNote::class.java)
             itemIntent.putExtra(MAIN_ACTIVITY_ITEM_ID, note.id)
             itemIntent.putExtra(MAIN_ACTIVITY_ITEM_TEXT01, note.name)
             itemIntent.putExtra(MAIN_ACTIVITY_ITEM_TEXT02, note.details)
             itemIntent.putExtra(MAIN_ACTIVITY_ITEM_DATE, note.updateDetails(note.name,note.details))
-            startActivity(itemIntent)
+
+            startActivityForResult.launch(itemIntent)
         }
     }
 
     private fun setClickOpenNoteActivity() {
-        addNote.setOnClickListener {
+        binding.addNote.setOnClickListener {
             startActivityForResult.launch(Intent(this, EditNote::class.java))
         }
     }
@@ -71,16 +75,28 @@ class MainActivity : AppCompatActivity() {
     private val startActivityForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             when (result.resultCode) {
-                Activity.RESULT_OK -> {
+                EditNote.SECOND_ACTIVITY_ITEM_INTENT_RETURN_NEW -> {
                     val note = Note(
-                        id = result.data
-                            ?.getIntExtra(EditNote.SECOND_ACTIVITY_ITEM_ID, 0)?.toLong() ?: 0,
+                        id = 111,
                         name = result.data
                             ?.getStringExtra(EditNote.SECOND_ACTIVITY_ITEM_TEXT01) ?: "",
                         details = result.data
                             ?.getStringExtra(EditNote.SECOND_ACTIVITY_ITEM_TEXT02) ?: "",
                     )
                     adapter.add(note)
+                }
+                EditNote.SECOND_ACTIVITY_ITEM_INTENT_RETURN_UPDATE -> {
+                    val note = Note(
+                        id = result.data
+                            ?.getIntExtra(EditNote.SECOND_ACTIVITY_ITEM_ID, 0) ?: 0,
+                        name = result.data
+                            ?.getStringExtra(EditNote.SECOND_ACTIVITY_ITEM_TEXT01) ?: "",
+                        details = result.data
+                            ?.getStringExtra(EditNote.SECOND_ACTIVITY_ITEM_TEXT02) ?: ""
+                    )
+                    if (noteIndex >= 0) {
+                        adapter.update(noteIndex, note)
+                    }
                 }
             }
         }

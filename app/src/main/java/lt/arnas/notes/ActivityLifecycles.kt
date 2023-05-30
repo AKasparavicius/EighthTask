@@ -9,6 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
             super.onCreate(savedInstanceState)
         }
 
+        override fun onSaveInstanceState(outState: Bundle) {
+            super.onSaveInstanceState(outState)
+        }
+
+        override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+            super.onRestoreInstanceState(savedInstanceState)
+        }
+
         override fun onStart() {
             super.onStart()
         }

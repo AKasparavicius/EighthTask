@@ -3,7 +3,7 @@ package lt.arnas.notes
 import java.time.LocalDateTime
 
 data class Note(
-    val id: Long, var name: String, var details: String,
+    val id: Int, var name: String, var details: String,
     val creationDate: LocalDateTime = LocalDateTime.now(),
     private var updateDate: LocalDateTime = LocalDateTime.now())
 {

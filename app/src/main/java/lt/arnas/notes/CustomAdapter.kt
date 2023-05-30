@@ -1,11 +1,13 @@
 package lt.arnas.notes
 
+import android.content.ClipData
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import lt.arnas.notes.databinding.NoteBinding
 
 class CustomAdapter(context: Context): BaseAdapter(){
 
@@ -20,6 +22,11 @@ class CustomAdapter(context: Context): BaseAdapter(){
         list.addAll(notes)
         notifyDataSetChanged()
     }
+    fun update(index: Int, note: Note) {
+        list.set(index, note)
+        notifyDataSetChanged()
+    }
+
 
     override fun getCount(): Int = list.size
 
@@ -29,12 +36,20 @@ class CustomAdapter(context: Context): BaseAdapter(){
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
-        val view = convertView ?: inflater.inflate(R.layout.note, parent, false)
+        var view = convertView
+        val binding: NoteBinding
 
-        view.findViewById<TextView>(R.id.idTextView).text = list[position].id.toString()
-        view.findViewById<TextView>(R.id.text01TextView).text = list[position].name
-        view.findViewById<TextView>(R.id.text02TextView).text = list[position].details
-        view.findViewById<TextView>(R.id.text03TextView).text = list[position].creationDate.toString()
+        if (view == null) {
+            binding = NoteBinding.inflate(inflater, parent, false)
+            view = binding.root
+            view.tag = binding
+        } else {
+            binding = view.tag as NoteBinding
+        }
+
+        binding.idTextView.text = list[position].id.toString()
+        binding.text01TextView.text = list[position].name
+        binding.text02TextView.text = list[position].details
 
         return view
     }

@@ -13,6 +13,7 @@ class EditNote : AppCompatActivity() {
     lateinit var text02EditText: EditText
     lateinit var closeButton: Button
     lateinit var saveButton: Button
+    private var finishIntentStatus = SECOND_ACTIVITY_ITEM_INTENT_RETURN_UPDATE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,15 +31,23 @@ class EditNote : AppCompatActivity() {
     }
 
     private fun getIntentExtra() {
-        idEditText.setText(
-            intent.getIntExtra(MainActivity.MAIN_ACTIVITY_ITEM_ID, 0).toString()
-        )
-        text01EditText.setText(
-            intent.getStringExtra(MainActivity.MAIN_ACTIVITY_ITEM_TEXT01)
-        )
-        text02EditText.setText(
-            intent.getStringExtra(MainActivity.MAIN_ACTIVITY_ITEM_TEXT02)
-        )
+
+        val itemId: Int =
+            intent.getIntExtra(MainActivity.MAIN_ACTIVITY_ITEM_ID, -1)
+
+        val itemText01 =
+            intent.getStringExtra(MainActivity.MAIN_ACTIVITY_ITEM_TEXT01) ?: ""
+
+        val itemText02 =
+            intent.getStringExtra(MainActivity.MAIN_ACTIVITY_ITEM_TEXT02) ?: ""
+
+        if (itemId >= 0) {
+            idEditText.setText(itemId.toString())
+            text01EditText.setText(itemText01)
+            text02EditText.setText(itemText02)
+        } else {
+            finishIntentStatus = SECOND_ACTIVITY_ITEM_INTENT_RETURN_NEW
+        }
     }
 
     private fun clickListenerSaveButton() {
@@ -47,7 +56,7 @@ class EditNote : AppCompatActivity() {
             finishIntent.putExtra(SECOND_ACTIVITY_ITEM_ID, (idEditText.text.toString()).toInt())
             finishIntent.putExtra(SECOND_ACTIVITY_ITEM_TEXT01, text01EditText.text.toString())
             finishIntent.putExtra(SECOND_ACTIVITY_ITEM_TEXT02, text02EditText.text.toString())
-            setResult(RESULT_OK, finishIntent)
+            setResult(finishIntentStatus, finishIntent)
             finish()
         }
     }
@@ -64,5 +73,7 @@ class EditNote : AppCompatActivity() {
                 "package lt.arnas.notes.secondactivity_item_text01"
             const val SECOND_ACTIVITY_ITEM_TEXT02 = "lt.arnas.notes.secondactivity_item_text02"
             const val SECOND_ACTIVITY_ITEM_DATE = "lt.arnas.notes.secondactivity_item_text03"
+            const val SECOND_ACTIVITY_ITEM_INTENT_RETURN_NEW = 101
+            const val SECOND_ACTIVITY_ITEM_INTENT_RETURN_UPDATE = 102
         }
 }
